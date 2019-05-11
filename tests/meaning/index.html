@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Тест «Цель в жизни»</title>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <h1>Тест «Цель в жизни»</h1>
+    <p>Для каждого из утверждений отметьте значение шкалы, максимально соответствующее вашему мнению.</p>
+    <p>Обратите внимание, что минимальное и максимальное количество баллов соответствует наиболее интенсивным эмоциям, противоположным по характеру. «Нейтральное отношение» означает, что у вас нет собственного мнения по этому вопросу. <em>Постарайтесь использовать нейтральные оценки по возможности реже</em>.</p>
+    <p>Результат появится под таблицей после оценки всех утверждений.</p>
+    <table id="test">
+    </table>
+    <p class="total-points">
+        Всего баллов: <span id="totalPoints">0</span>. <span id="result"></span>
+    </p>
+    <script src="./js-yaml.min.js"></script>
+    <script>
+    const testTableEl = document.getElementById('test');
+    const totalPointsEl = document.getElementById('totalPoints');
+    let statementsCount = 0;
+
+    fetch('/tests/meaning/meaning-test.yaml')
+      .then(function(response) {
+        return response.text();
+      }).then(function(yaml) {
+        const data = jsyaml.load(yaml);
+        let content = '';
+        let rowNumber = 1;
+        statementsCount = data.length;
+        for (const item of data) {
+          content += makeRow(rowNumber, item);
+          rowNumber += 1;
+        }
+        testTableEl.innerHTML += content;
+      })
+      .catch();
+
+    let totalPoints = 0;
+    testTableEl.addEventListener('click', function(ev) {
+      const cell = ev.target;
+      const isPointsCell = cell.classList.contains('row__points');
+      if (!isPointsCell) {
+        return;
+      }
+
+      togglePointCell(cell);
+      const totals = countTotals(testTableEl, 'row__points', totalPointsEl);
+      totalPointsEl.innerHTML = totals.points;
+
+      if (totals.statements === statementsCount) {
+        document.getElementById('result').innerHTML = prepareResultDescription(totalPoints);
+      }
+    });
+
+    function countTotals(tableEl, pointCellClassName, totalPointsEl) {
+      const pointEls = tableEl.querySelectorAll(`.${pointCellClassName}._selected`);
+      let totalPoints = 0;
+      let answeredStatements = 0;
+
+      for (const pointCell of pointEls) {
+        answeredStatements += 1;
+        totalPoints += parseInt(pointCell.innerHTML, 10);
+      }
+
+      return { points: totalPoints, statements: answeredStatements };
+    }
+
+    function togglePointCell(currentCell) {
+      const row = currentCell.closest('.row');
+      const cellsInRow = row.querySelectorAll('.row__points');
+      const isCurrentCellSelected = currentCell.classList.contains('_selected');
+
+      for (let cell of cellsInRow) {
+        cell.classList.remove('_selected');
+      }
+
+      currentCell.classList.toggle('_selected', !isCurrentCellSelected);
+    }
+
+    function makeRow(rowNumber, { title, variants, pointsOrder }) {
+      function makePoints(pointsOrder) {
+        const points = pointsOrder === 'asc' ? [1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1];
+        return points.map(number => `<td class="row__points">${number}</td>`).join('');
+      }
+
+      return `
+          <tbody class="statement">
+            <tr class="row">
+                <td class="row__id" rowspan="2">${rowNumber}</td>
+                <td class="row__term" rowspan="2">${title}</td>
+                ${makePoints(pointsOrder)}
+            </tr>
+            <tr>
+                <td class="row__variant" colspan="2">${variants[0]}</td>
+                <td class="row__variant" colspan="3">${variants[1]}</td>
+                <td class="row__variant" colspan="2">${variants[2]}</td>
+            </tr>
+        </tbody>`;
+    }
+
+    function prepareResultDescription(totalPoints) {
+      if (totalPoints < 92) {
+        return "В вашей жизни явно не хватает смысла и цели.";
+      } else if (totalPoints >= 92 && totalPoints <= 112) {
+        return "Вы недостаточно ясно представляете себе цель жизни.";
+      } else if (totalPoints > 112) {
+        return "У вас есть ясная и понятная цель в жизни.";
+      }
+    }
+    </script>
+</body>
+
+</html>
