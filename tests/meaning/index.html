@@ -40,7 +40,6 @@
       })
       .catch();
 
-    let totalPoints = 0;
     testTableEl.addEventListener('click', function(ev) {
       const cell = ev.target;
       const isPointsCell = cell.classList.contains('row__points');
@@ -53,7 +52,7 @@
       totalPointsEl.innerHTML = totals.points;
 
       if (totals.statements === statementsCount) {
-        document.getElementById('result').innerHTML = prepareResultDescription(totalPoints);
+        document.getElementById('result').innerHTML = prepareResultDescription(totals.points);
       }
     });
 
