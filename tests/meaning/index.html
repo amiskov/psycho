@@ -24,7 +24,7 @@
     const totalPointsEl = document.getElementById('totalPoints');
     let statementsCount = 0;
 
-    fetch('/tests/meaning/meaning-test.yaml')
+    fetch('./meaning-test.yaml')
       .then(function(response) {
         return response.text();
       }).then(function(yaml) {
