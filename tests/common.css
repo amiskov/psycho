@@ -24,3 +24,13 @@ th {
 ._selected {
     background: #EEC;
 }
+button {
+    font-size: 16px;
+    padding: 5px 20px;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+    background: #666;
+    color: #FFF;
+    border: none;
+    line-height: 2em;
+    border-radius: 5px
+}
